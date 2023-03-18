@@ -1,0 +1,7 @@
+name: test-lsa
+dependencies:
+  - python=3.8.12
+  - pip
+  - pip:
+    - scipy==1.7.1
+    - numpy==1.21.6
