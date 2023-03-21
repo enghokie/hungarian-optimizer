@@ -1,6 +1,6 @@
 # Hungarian Optimizer
 
-> A c++ implementation of the Hungarian algorithm.
+> A header-only c++ implementation of the Hungarian algorithm.
 
 ## Dependency
 
