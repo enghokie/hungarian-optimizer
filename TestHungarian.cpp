@@ -17,12 +17,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           8.93, 6.34, 1.23, 8.11, 1.94;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 5.5600000000000005d;
@@ -44,12 +44,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           8.93, 1.94, 1.23, 8.11, 6.34;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 5.5600000000000005d;
@@ -70,12 +70,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           0.93, 0.94, 0.23, 0.11, 0.94;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 0.61d;
@@ -96,12 +96,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           25.0, 16.0, 81.0, 25.0, 7.0;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 16.0d;
@@ -127,12 +127,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           8.93;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 3.62;
@@ -155,12 +155,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           8.93;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 3.62d;
@@ -182,12 +182,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           0.93;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 0.5d;
@@ -209,12 +209,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           25.0;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 9.0d;
@@ -240,12 +240,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           8.11;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 2.63d;
@@ -268,12 +268,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           1.23, 8.11;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 4.36d;
@@ -295,12 +295,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           0.11;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 0.41000000000000003d;
@@ -322,12 +322,12 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
           25.0;
 
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
+      const auto assignments = optimizer.minimize();
       const auto& rowsol = assignments.first;
       const auto& colsol = assignments.second;
       const auto totalCost =
-          HungarianOptimizer<double>::GetTotalCost(costMatrix, rowsol, colsol);
-      HungarianOptimizer<double>::PrintMatrix(costMatrix, rowsol, colsol);
+          HungarianOptimizer<double>::getTotalCost(costMatrix, rowsol, colsol);
+      HungarianOptimizer<double>::printMatrix(costMatrix, rowsol, colsol);
 
       // Check expected values
       auto expectedCost = 9.0d;
@@ -359,8 +359,8 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
 
       const auto start = std::chrono::high_resolution_clock::now();
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
-      const auto totalCost = optimizer.GetTotalCost(
+      const auto assignments = optimizer.minimize();
+      const auto totalCost = optimizer.getTotalCost(
           costMatrix, assignments.first, assignments.second);
       const auto totalEnd = std::chrono::high_resolution_clock::now();
       const auto totalTook =
@@ -386,8 +386,8 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
 
       const auto start = std::chrono::high_resolution_clock::now();
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
-      const auto totalCost = optimizer.GetTotalCost(
+      const auto assignments = optimizer.minimize();
+      const auto totalCost = optimizer.getTotalCost(
           costMatrix, assignments.first, assignments.second);
       const auto totalEnd = std::chrono::high_resolution_clock::now();
       const auto totalTook =
@@ -413,8 +413,8 @@ TEST_SUITE("Test Hungarian algorithm accuracy") {
 
       const auto start = std::chrono::high_resolution_clock::now();
       HungarianOptimizer<double> optimizer(costMatrix);
-      const auto assignments = optimizer.Minimize();
-      const auto totalCost = optimizer.GetTotalCost(
+      const auto assignments = optimizer.minimize();
+      const auto totalCost = optimizer.getTotalCost(
           costMatrix, assignments.first, assignments.second);
       const auto totalEnd = std::chrono::high_resolution_clock::now();
       const auto totalTook =

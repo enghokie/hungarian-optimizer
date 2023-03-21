@@ -65,126 +65,130 @@ class HungarianOptimizer {
   // Find an assignment which maximizes the total cost.
   // Returns the assignment in the two vectors passed as argument.
   // rowsol[i] is assigned to colsol[i].
-  std::pair<Eigen::VectorXi, Eigen::VectorXi> Maximize();
+  std::pair<Eigen::VectorXi, Eigen::VectorXi> maximize();
 
-  // Like Maximize(), but minimizing the cost instead.
-  std::pair<Eigen::VectorXi, Eigen::VectorXi> Minimize();
+  // Like maximize(), but minimizing the cost instead.
+  std::pair<Eigen::VectorXi, Eigen::VectorXi> minimize();
 
   // Print the matrix to stdout (for debugging.)
-  static void PrintMatrix(
+  static void printMatrix(
       const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& costs,
       const Eigen::VectorXi& rowsol, const Eigen::VectorXi& colsol);
 
   // Calculate the total cost given the cost matrix and optimal row/col indices.
-  static T GetTotalCost(
+  static T getTotalCost(
       const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& cost,
       const Eigen::VectorXi& rowsol, const Eigen::VectorXi& colsol);
 
  private:
   typedef void (HungarianOptimizer<T>::*Step)();
 
-  typedef enum { NONE, PRIME, STAR } Mark;
+  enum class Mark { NONE, PRIME, STAR };
 
   // Convert the final cost matrix into a set of assignments of rowsol->colsol.
   // Returns the assignment in the two vectors passed as argument, the same as
   // Minimize and Maximize
-  void FindAssignments(
+  void findAssignments(
       std::pair<Eigen::VectorXi, Eigen::VectorXi>& assignments);
 
   // Is the cell (row, col) starred?
-  bool IsStarred(int row, int col) const { return marks_(row, col) == STAR; }
+  bool isStarred(int row, int col) const {
+    return _marks(row, col) == Mark::STAR;
+  }
 
   // Mark cell (row, col) with a star
-  void Star(int row, int col) {
-    marks_(row, col) = STAR;
-    stars_in_col_[col]++;
+  void star(int row, int col) {
+    _marks(row, col) = Mark::STAR;
+    _starsInCol[col]++;
   }
 
   // Remove a star from cell (row, col)
-  void UnStar(int row, int col) {
-    marks_(row, col) = NONE;
-    stars_in_col_[col]--;
+  void unstar(int row, int col) {
+    _marks(row, col) = Mark::NONE;
+    _starsInCol[col]--;
   }
 
   // Find a column in row 'row' containing a star, or return
   // kHungarianOptimizerColNotFound if no such column exists.
-  int FindStarInRow(int row) const;
+  int findStarInRow(int row) const;
 
   // Find a row in column 'col' containing a star, or return
   // kHungarianOptimizerRowNotFound if no such row exists.
-  int FindStarInCol(int col) const;
+  int findStarInCol(int col) const;
 
   // Is cell (row, col) marked with a prime?
-  bool IsPrimed(int row, int col) const { return marks_(row, col) == PRIME; }
+  bool isPrimed(int row, int col) const {
+    return _marks(row, col) == Mark::PRIME;
+  }
 
   // Mark cell (row, col) with a prime.
-  void Prime(int row, int col) { marks_(row, col) = PRIME; }
+  void prime(int row, int col) { _marks(row, col) = Mark::PRIME; }
 
   // Find a column in row containing a prime, or return
   // kHungarianOptimizerColNotFound if no such column exists.
-  int FindPrimeInRow(int row) const;
+  int findPrimeInRow(int row) const;
 
-  // Remove the prime marks_ from every cell in the matrix.
-  void ClearPrimes();
+  // Remove the prime _marks from every cell in the matrix.
+  void clearPrimes();
 
   // Does column col contain a star?
-  bool ColContainsStar(int col) const { return stars_in_col_[col] > 0; }
+  bool colContainsStar(int col) const { return _starsInCol[col] > 0; }
 
   // Is row 'row' covered?
-  bool RowCovered(int row) const { return rows_covered_[row]; }
+  bool rowCovered(int row) const { return _rowsCovered[row]; }
 
   // Cover row 'row'.
-  void CoverRow(int row) { rows_covered_[row] = true; }
+  void coverRow(int row) { _rowsCovered[row] = true; }
 
   // Uncover row 'row'.
-  void UncoverRow(int row) { rows_covered_[row] = false; }
+  void uncoverRow(int row) { _rowsCovered[row] = false; }
 
   // Is column col covered?
-  bool ColCovered(int col) const { return cols_covered_[col]; }
+  bool colCovered(int col) const { return _colsCovered[col]; }
 
   // Cover column col.
-  void CoverCol(int col) { cols_covered_[col] = true; }
+  void coverCol(int col) { _colsCovered[col] = true; }
 
   // Uncover column col.
-  void UncoverCol(int col) { cols_covered_[col] = false; }
+  void uncoverCol(int col) { _colsCovered[col] = false; }
 
   // Uncover ever row and column in the matrix.
-  void ClearCovers();
+  void clearCovers();
 
   // Find the smallest uncovered cell in the matrix.
-  T FindSmallestUncovered() const;
+  T findSmallestUncovered() const;
 
   // Find an uncovered zero and store its coordinates in (zeroRow_, zeroCol_)
   // and return true, or return false if no such cell exists.
-  bool FindZero(int& zero_row, int& zero_col) const;
+  bool findZero(int& zero_row, int& zero_col) const;
 
   // Run the Munkres algorithm!
-  void DoMunkres();
+  void doMunkres();
 
   // Step 1.
   // For each row of the matrix, find the smallest element and subtract it
   // from every element in its row.  Go to Step 2.
-  void ReduceRows();
+  void reduceRows();
 
   // Step 2.
   // Find a zero (Z) in the matrix.  If there is no starred zero in its row
   // or column, star Z.  Repeat for every element in the matrix.  Go to step 3.
   // Note: profiling shows this method to use 9.2% of the CPU - the next
   // slowest step takes 0.6%.  I can't think of a way of speeding it up though.
-  void StarZeroes();
+  void starZeroes();
 
   // Step 3.
   // Cover each column containing a starred zero.  If all columns are
   // covered, the starred zeros describe a complete set of unique assignments.
   // In this case, terminate the algorithm.  Otherwise, go to step 4.
-  void CoverStarredZeroes();
+  void coverStarredZeroes();
 
   // Step 4.
   // Find a noncovered zero and prime it.  If there is no starred zero in the
   // row containing this primed zero, Go to Step 5.  Otherwise, cover this row
   // and uncover the column containing the starred zero. Continue in this manner
   // until there are no uncovered zeros left, then go to Step 6.
-  void PrimeZeroes();
+  void primeZeroes();
 
   // Step 5.
   // Construct a series of alternating primed and starred zeros as follows.
@@ -195,144 +199,144 @@ class HungarianOptimizer {
   // Unstar each starred zero of the series, star each primed zero of the
   // series, erase all primes and uncover every line in the matrix.  Return to
   // Step 3.
-  void MakeAugmentingPath();
+  void makeAugmentingPath();
 
   // Step 6.
   // Add the smallest uncovered value in the matrix to every element of each
   // covered row, and subtract it from every element of each uncovered column.
   // Return to Step 4 without altering any stars, primes, or covered lines.
-  void AugmentPath();
+  void augmentPath();
 
   // The size of the problem, i.e. max(#agents, #tasks).
-  int matrix_size_;
+  int _matrixSize;
 
   // The expanded cost matrix.
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> costs_;
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> _costs;
 
   // The greatest cost in the initial cost matrix.
-  T max_cost_;
+  T _maxCost;
 
   // Which rows and columns are currently covered.
-  std::vector<bool> rows_covered_;
-  std::vector<bool> cols_covered_;
+  std::vector<bool> _rowsCovered;
+  std::vector<bool> _colsCovered;
 
-  // The marks_ (star/prime/none) on each element of the cost matrix.
-  Eigen::Matrix<Mark, Eigen::Dynamic, Eigen::Dynamic> marks_;
+  // The _marks (star/prime/none) on each element of the cost matrix.
+  Eigen::Matrix<Mark, Eigen::Dynamic, Eigen::Dynamic> _marks;
 
   // The number of stars in each column - used to speed up coverStarredZeroes.
-  std::vector<int> stars_in_col_;
+  std::vector<int> _starsInCol;
 
   // Representation of a path_ through the matrix - used in step 5.
-  std::vector<int> rowsol_;  // i.e. the agents
-  std::vector<int> colsol_;  // i.e. the tasks
+  std::vector<int> _rowsol;  // i.e. the agents
+  std::vector<int> _colsol;  // i.e. the tasks
 
-  // The width_ and height_ of the initial (non-expanded) cost matrix.
-  int width_;
-  int height_;
+  // The _width and _height of the initial (non-expanded) cost matrix.
+  int _width;
+  int _height;
 
   // The current state of the algorithm
-  std::function<void()> fn_state_ = nullptr;
+  std::function<void()> _fnState = nullptr;
 };
 
 template <typename T>
 HungarianOptimizer<T>::HungarianOptimizer(
     const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& costs)
-    : matrix_size_(0),
-      costs_(),
-      max_cost_(0),
-      rows_covered_(),
-      cols_covered_(),
-      marks_(),
-      stars_in_col_(),
-      rowsol_(),
-      colsol_(),
-      width_(0),
-      height_(0) {
-  width_ = costs.cols();
+    : _matrixSize(0),
+      _costs(),
+      _maxCost(0),
+      _rowsCovered(),
+      _colsCovered(),
+      _marks(),
+      _starsInCol(),
+      _rowsol(),
+      _colsol(),
+      _width(0),
+      _height(0) {
+  _width = costs.cols();
 
-  if (width_ > 0) {
-    height_ = costs.rows();
+  if (_width > 0) {
+    _height = costs.rows();
   } else {
-    height_ = 0;
+    _height = 0;
   }
 
-  matrix_size_ = std::max(width_, height_);
-  max_cost_ = 0;
+  _matrixSize = std::max(_width, _height);
+  _maxCost = 0;
 
   // Generate the expanded cost matrix by adding extra 0-valued elements in
   // order to make a square matrix.  At the same time, find the greatest cost
   // in the matrix (used later if we want to maximize rather than minimize the
   // overall cost.)
-  costs_.resize(matrix_size_, matrix_size_);
-  for (int row = 0; row < matrix_size_; ++row) {
-    for (int col = 0; col < matrix_size_; ++col) {
-      if ((row >= height_) || (col >= width_)) {
-        costs_(row, col) = 0;
+  _costs.resize(_matrixSize, _matrixSize);
+  for (int row = 0; row < _matrixSize; ++row) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if ((row >= _height) || (col >= _width)) {
+        _costs(row, col) = 0;
       } else {
-        costs_(row, col) = costs(row, col);
-        max_cost_ = std::max(max_cost_, costs_(row, col));
+        _costs(row, col) = costs(row, col);
+        _maxCost = std::max(_maxCost, _costs(row, col));
       }
     }
   }
 
   // Initially, none of the cells of the matrix are marked.
-  marks_.resize(matrix_size_, matrix_size_);
-  for (int row = 0; row < matrix_size_; ++row) {
-    for (int col = 0; col < matrix_size_; ++col) {
-      marks_(row, col) = NONE;
+  _marks.resize(_matrixSize, _matrixSize);
+  for (int row = 0; row < _matrixSize; ++row) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      _marks(row, col) = Mark::NONE;
     }
   }
 
-  rows_covered_.resize(matrix_size_, false);
-  cols_covered_.resize(matrix_size_, false);
-  stars_in_col_.resize(matrix_size_, 0);
-  rowsol_.resize(matrix_size_ * 2, 0);
-  colsol_.resize(matrix_size_ * 2, 0);
+  _rowsCovered.resize(_matrixSize, false);
+  _colsCovered.resize(_matrixSize, false);
+  _starsInCol.resize(_matrixSize, 0);
+  _rowsol.resize(_matrixSize * 2, 0);
+  _colsol.resize(_matrixSize * 2, 0);
 }
 
 // Find an assignment which maximizes the total cost.
 // Return an array of pairs of integers.  Each pair (i, j) corresponds to
 // assigning agent i to task j.
 template <typename T>
-std::pair<Eigen::VectorXi, Eigen::VectorXi> HungarianOptimizer<T>::Maximize() {
+std::pair<Eigen::VectorXi, Eigen::VectorXi> HungarianOptimizer<T>::maximize() {
   // Find a maximal assignment by subtracting each of the
-  // original costs from max_cost_  and then minimizing.
-  for (int row = 0; row < height_; ++row) {
-    for (int col = 0; col < width_; ++col) {
-      costs_(row, col) = max_cost_ - costs_(row, col);
+  // original costs from _maxCost  and then minimizing.
+  for (int row = 0; row < _height; ++row) {
+    for (int col = 0; col < _width; ++col) {
+      _costs(row, col) = _maxCost - _costs(row, col);
     }
   }
 
-  return Minimize();
+  return minimize();
 }
 
 // Find an assignment which minimizes the total cost.
 // Return an array of pairs of integers.  Each pair (i, j) corresponds to
 // assigning agent i to task j.
 template <typename T>
-std::pair<Eigen::VectorXi, Eigen::VectorXi> HungarianOptimizer<T>::Minimize() {
-  DoMunkres();
+std::pair<Eigen::VectorXi, Eigen::VectorXi> HungarianOptimizer<T>::minimize() {
+  doMunkres();
 
   std::pair<Eigen::VectorXi, Eigen::VectorXi> assignments;
-  FindAssignments(assignments);
+  findAssignments(assignments);
 
   return assignments;
 }
 
 // Convert the final cost matrix into a set of assignments of agents -> tasks.
 // Return an array of pairs of integers, the same as the return values of
-// Minimize() and Maximize()
+// minimize() and maximize()
 template <typename T>
-void HungarianOptimizer<T>::FindAssignments(
+void HungarianOptimizer<T>::findAssignments(
     std::pair<Eigen::VectorXi, Eigen::VectorXi>& assignments) {
-  auto minDims = std::min(width_, height_);
+  auto minDims = std::min(_width, _height);
   assignments.first.resize(minDims);
   assignments.second.resize(minDims);
 
   auto idx = 0;
-  for (int row = 0; row < height_; ++row) {
-    for (int col = 0; col < width_; ++col) {
-      if (IsStarred(row, col)) {
+  for (int row = 0; row < _height; ++row) {
+    for (int col = 0; col < _width; ++col) {
+      if (isStarred(row, col)) {
         assignments.first[idx] = row;
         assignments.second[idx] = col;
         ++idx;
@@ -341,7 +345,7 @@ void HungarianOptimizer<T>::FindAssignments(
     }
   }
   // TODO(user)
-  // result_size = min(width_, height_);
+  // result_size = min(_width, _height);
   // CHECK colsol.size() == result_size
   // CHECK rowsol.size() == result_size
 }
@@ -349,9 +353,9 @@ void HungarianOptimizer<T>::FindAssignments(
 // Find a column in row 'row' containing a star, or return
 // kHungarianOptimizerColNotFound if no such column exists.
 template <typename T>
-int HungarianOptimizer<T>::FindStarInRow(int row) const {
-  for (int col = 0; col < matrix_size_; ++col) {
-    if (IsStarred(row, col)) {
+int HungarianOptimizer<T>::findStarInRow(int row) const {
+  for (int col = 0; col < _matrixSize; ++col) {
+    if (isStarred(row, col)) {
       return col;
     }
   }
@@ -362,13 +366,13 @@ int HungarianOptimizer<T>::FindStarInRow(int row) const {
 // Find a row in column 'col' containing a star, or return
 // kHungarianOptimizerRowNotFound if no such row exists.
 template <typename T>
-int HungarianOptimizer<T>::FindStarInCol(int col) const {
-  if (!ColContainsStar(col)) {
+int HungarianOptimizer<T>::findStarInCol(int col) const {
+  if (!colContainsStar(col)) {
     return kHungarianOptimizerRowNotFound;
   }
 
-  for (int row = 0; row < matrix_size_; ++row) {
-    if (IsStarred(row, col)) {
+  for (int row = 0; row < _matrixSize; ++row) {
+    if (isStarred(row, col)) {
       return row;
     }
   }
@@ -380,9 +384,9 @@ int HungarianOptimizer<T>::FindStarInCol(int col) const {
 // Find a column in row containing a prime, or return
 // kHungarianOptimizerColNotFound if no such column exists.
 template <typename T>
-int HungarianOptimizer<T>::FindPrimeInRow(int row) const {
-  for (int col = 0; col < matrix_size_; ++col) {
-    if (IsPrimed(row, col)) {
+int HungarianOptimizer<T>::findPrimeInRow(int row) const {
+  for (int col = 0; col < _matrixSize; ++col) {
+    if (isPrimed(row, col)) {
       return col;
     }
   }
@@ -392,11 +396,11 @@ int HungarianOptimizer<T>::FindPrimeInRow(int row) const {
 
 // Remove the prime marks from every cell in the matrix.
 template <typename T>
-void HungarianOptimizer<T>::ClearPrimes() {
-  for (int row = 0; row < matrix_size_; ++row) {
-    for (int col = 0; col < matrix_size_; ++col) {
-      if (IsPrimed(row, col)) {
-        marks_(row, col) = NONE;
+void HungarianOptimizer<T>::clearPrimes() {
+  for (int row = 0; row < _matrixSize; ++row) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if (isPrimed(row, col)) {
+        _marks(row, col) = Mark::NONE;
       }
     }
   }
@@ -404,29 +408,29 @@ void HungarianOptimizer<T>::ClearPrimes() {
 
 // Uncovery ever row and column in the matrix.
 template <typename T>
-void HungarianOptimizer<T>::ClearCovers() {
-  for (int x = 0; x < matrix_size_; x++) {
-    UncoverRow(x);
-    UncoverCol(x);
+void HungarianOptimizer<T>::clearCovers() {
+  for (int x = 0; x < _matrixSize; x++) {
+    uncoverRow(x);
+    uncoverCol(x);
   }
 }
 
 // Find the smallest uncovered cell in the matrix.
 template <typename T>
-T HungarianOptimizer<T>::FindSmallestUncovered() const {
+T HungarianOptimizer<T>::findSmallestUncovered() const {
   T minval = std::numeric_limits<T>::max();
 
-  for (int row = 0; row < matrix_size_; ++row) {
-    if (RowCovered(row)) {
+  for (int row = 0; row < _matrixSize; ++row) {
+    if (rowCovered(row)) {
       continue;
     }
 
-    for (int col = 0; col < matrix_size_; ++col) {
-      if (ColCovered(col)) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if (colCovered(col)) {
         continue;
       }
 
-      minval = std::min(minval, costs_(row, col));
+      minval = std::min(minval, _costs(row, col));
     }
   }
 
@@ -436,18 +440,18 @@ T HungarianOptimizer<T>::FindSmallestUncovered() const {
 // Find an uncovered zero and store its co-ordinates in (zeroRow, zeroCol)
 // and return true, or return false if no such cell exists.
 template <typename T>
-bool HungarianOptimizer<T>::FindZero(int& zero_row, int& zero_col) const {
-  for (int row = 0; row < matrix_size_; ++row) {
-    if (RowCovered(row)) {
+bool HungarianOptimizer<T>::findZero(int& zero_row, int& zero_col) const {
+  for (int row = 0; row < _matrixSize; ++row) {
+    if (rowCovered(row)) {
       continue;
     }
 
-    for (int col = 0; col < matrix_size_; ++col) {
-      if (ColCovered(col)) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if (colCovered(col)) {
         continue;
       }
 
-      if (costs_(row, col) == 0) {
+      if (_costs(row, col) == 0) {
         zero_row = row;
         zero_col = col;
         return true;
@@ -460,7 +464,7 @@ bool HungarianOptimizer<T>::FindZero(int& zero_row, int& zero_col) const {
 
 // Print the matrix to stdout (for debugging.)
 template <typename T>
-void HungarianOptimizer<T>::PrintMatrix(
+void HungarianOptimizer<T>::printMatrix(
     const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& costs,
     const Eigen::VectorXi& rowsol, const Eigen::VectorXi& colsol) {
   auto minDims = std::min(rowsol.size(), colsol.size());
@@ -479,7 +483,7 @@ void HungarianOptimizer<T>::PrintMatrix(
 // @param cost The cost matrix to compute the total cost from.
 // @param assignments Cost assignments to get the total cost from.
 template <typename T>
-T HungarianOptimizer<T>::GetTotalCost(
+T HungarianOptimizer<T>::getTotalCost(
     const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& cost,
     const Eigen::VectorXi& rowsol, const Eigen::VectorXi& colsol) {
   T totalCost = 0;
@@ -491,10 +495,10 @@ T HungarianOptimizer<T>::GetTotalCost(
 
 //  Run the Munkres algorithm!
 template <typename T>
-void HungarianOptimizer<T>::DoMunkres() {
-  fn_state_ = std::bind(&HungarianOptimizer<T>::ReduceRows, this);
-  while (fn_state_ != nullptr) {
-    fn_state_();
+void HungarianOptimizer<T>::doMunkres() {
+  _fnState = std::bind(&HungarianOptimizer<T>::reduceRows, this);
+  while (_fnState != nullptr) {
+    _fnState();
   }
 }
 
@@ -502,47 +506,47 @@ void HungarianOptimizer<T>::DoMunkres() {
 // For each row of the matrix, find the smallest element and subtract it
 // from every element in its row.  Go to Step 2.
 template <typename T>
-void HungarianOptimizer<T>::ReduceRows() {
-  for (int row = 0; row < matrix_size_; ++row) {
-    T min_cost = costs_(row, 0);
-    for (int col = 1; col < matrix_size_; ++col) {
-      min_cost = std::min(min_cost, costs_(row, col));
+void HungarianOptimizer<T>::reduceRows() {
+  for (int row = 0; row < _matrixSize; ++row) {
+    T min_cost = _costs(row, 0);
+    for (int col = 1; col < _matrixSize; ++col) {
+      min_cost = std::min(min_cost, _costs(row, col));
     }
-    for (int col = 0; col < matrix_size_; ++col) {
-      costs_(row, col) -= min_cost;
+    for (int col = 0; col < _matrixSize; ++col) {
+      _costs(row, col) -= min_cost;
     }
   }
-  fn_state_ = std::bind(&HungarianOptimizer<T>::StarZeroes, this);
+  _fnState = std::bind(&HungarianOptimizer<T>::starZeroes, this);
 }
 
 // Step 2.
 // Find a zero (Z) in the matrix.  If there is no starred zero in its row
 // or column, star Z.  Repeat for every element in the matrix.  Go to step 3.
 template <typename T>
-void HungarianOptimizer<T>::StarZeroes() {
+void HungarianOptimizer<T>::starZeroes() {
   // Since no rows or columns are covered on entry to this step, we use the
   // covers as a quick way of marking which rows & columns have stars in them.
-  for (int row = 0; row < matrix_size_; ++row) {
-    if (RowCovered(row)) {
+  for (int row = 0; row < _matrixSize; ++row) {
+    if (rowCovered(row)) {
       continue;
     }
 
-    for (int col = 0; col < matrix_size_; ++col) {
-      if (ColCovered(col)) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if (colCovered(col)) {
         continue;
       }
 
-      if (costs_(row, col) == 0) {
-        Star(row, col);
-        CoverRow(row);
-        CoverCol(col);
+      if (_costs(row, col) == 0) {
+        star(row, col);
+        coverRow(row);
+        coverCol(col);
         break;
       }
     }
   }
 
-  ClearCovers();
-  fn_state_ = std::bind(&HungarianOptimizer<T>::CoverStarredZeroes, this);
+  clearCovers();
+  _fnState = std::bind(&HungarianOptimizer<T>::coverStarredZeroes, this);
 }
 
 // Step 3.
@@ -550,21 +554,21 @@ void HungarianOptimizer<T>::StarZeroes() {
 // covered, the starred zeros describe a complete set of unique assignments.
 // In this case, terminate the algorithm.  Otherwise, go to step 4.
 template <typename T>
-void HungarianOptimizer<T>::CoverStarredZeroes() {
+void HungarianOptimizer<T>::coverStarredZeroes() {
   int num_covered = 0;
 
-  for (int col = 0; col < matrix_size_; ++col) {
-    if (ColContainsStar(col)) {
-      CoverCol(col);
+  for (int col = 0; col < _matrixSize; ++col) {
+    if (colContainsStar(col)) {
+      coverCol(col);
       num_covered++;
     }
   }
 
-  if (num_covered >= matrix_size_) {
-    fn_state_ = nullptr;
+  if (num_covered >= _matrixSize) {
+    _fnState = nullptr;
     return;
   }
-  fn_state_ = std::bind(&HungarianOptimizer<T>::PrimeZeroes, this);
+  _fnState = std::bind(&HungarianOptimizer<T>::primeZeroes, this);
 }
 
 // Step 4.
@@ -573,31 +577,31 @@ void HungarianOptimizer<T>::CoverStarredZeroes() {
 // and uncover the column containing the starred zero. Continue in this manner
 // until there are no uncovered zeros left, then go to Step 6.
 template <typename T>
-void HungarianOptimizer<T>::PrimeZeroes() {
-  // This loop is guaranteed to terminate in at most matrix_size_ iterations,
+void HungarianOptimizer<T>::primeZeroes() {
+  // This loop is guaranteed to terminate in at most _matrixSize iterations,
   // as findZero() returns a location only if there is at least one uncovered
   // zero in the matrix.  Each iteration, either one row is covered or the
-  // loop terminates.  Since there are matrix_size_ rows, after that many
+  // loop terminates.  Since there are _matrixSize rows, after that many
   // iterations there are no uncovered cells and hence no uncovered zeroes,
   // so the loop terminates.
   for (;;) {
     int zero_row, zero_col;
-    if (!FindZero(zero_row, zero_col)) {
+    if (!findZero(zero_row, zero_col)) {
       // No uncovered zeroes.
-      fn_state_ = std::bind(&HungarianOptimizer<T>::AugmentPath, this);
+      _fnState = std::bind(&HungarianOptimizer<T>::augmentPath, this);
       return;
     }
 
-    Prime(zero_row, zero_col);
-    int star_col = FindStarInRow(zero_row);
+    prime(zero_row, zero_col);
+    int star_col = findStarInRow(zero_row);
 
     if (star_col != kHungarianOptimizerColNotFound) {
-      CoverRow(zero_row);
-      UncoverCol(star_col);
+      coverRow(zero_row);
+      uncoverCol(star_col);
     } else {
-      rowsol_[0] = zero_row;
-      colsol_[0] = zero_col;
-      fn_state_ = std::bind(&HungarianOptimizer<T>::MakeAugmentingPath, this);
+      _rowsol[0] = zero_row;
+      _colsol[0] = zero_col;
+      _fnState = std::bind(&HungarianOptimizer<T>::makeAugmentingPath, this);
       return;
     }
   }
@@ -613,11 +617,11 @@ void HungarianOptimizer<T>::PrimeZeroes() {
 // series, erase all primes and uncover every line in the matrix.  Return to
 // Step 3.
 template <typename T>
-void HungarianOptimizer<T>::MakeAugmentingPath() {
+void HungarianOptimizer<T>::makeAugmentingPath() {
   bool done = false;
   int count = 0;
 
-  // Note: this loop is guaranteed to terminate within matrix_size_ iterations
+  // Note: this loop is guaranteed to terminate within _matrixSize iterations
   // because:
   // 1) on entry to this step, there is at least 1 column with no starred zero
   //    (otherwise we would have terminated the algorithm already.)
@@ -626,10 +630,10 @@ void HungarianOptimizer<T>::MakeAugmentingPath() {
   //
   // Since the path_ we construct visits primed and starred zeroes alternately,
   // and terminates if we reach a primed zero in a column with no star, our
-  // path_ must either contain matrix_size_ or fewer stars (in which case the
-  // loop iterates fewer than matrix_size_ times), or it contains more.  In
+  // path_ must either contain _matrixSize or fewer stars (in which case the
+  // loop iterates fewer than _matrixSize times), or it contains more.  In
   // that case, because (1) implies that there are fewer than
-  // matrix_size_ stars, we must have visited at least one star more than once.
+  // _matrixSize stars, we must have visited at least one star more than once.
   // Consider the first such star that we visit more than once; it must have
   // been reached immediately after visiting a prime in the same row.  By (2),
   // this prime is unique and so must have also been visited more than once.
@@ -637,43 +641,43 @@ void HungarianOptimizer<T>::MakeAugmentingPath() {
   // visited more than once, contradicting the assumption that we chose the
   // first multiply visited star, or it must be in the same column as more
   // than one star, contradicting (3).  Therefore, we never visit any star
-  // more than once and the loop terminates within matrix_size_ iterations.
+  // more than once and the loop terminates within _matrixSize iterations.
 
   while (!done) {
     // First construct the alternating path...
-    int row = FindStarInCol(colsol_[count]);
+    int row = findStarInCol(_colsol[count]);
 
     if (row != kHungarianOptimizerRowNotFound) {
       count++;
-      rowsol_[count] = row;
-      colsol_[count] = colsol_[count - 1];
+      _rowsol[count] = row;
+      _colsol[count] = _colsol[count - 1];
     } else {
       done = true;
     }
 
     if (!done) {
-      int col = FindPrimeInRow(rowsol_[count]);
+      int col = findPrimeInRow(_rowsol[count]);
       count++;
-      rowsol_[count] = rowsol_[count - 1];
-      colsol_[count] = col;
+      _rowsol[count] = _rowsol[count - 1];
+      _colsol[count] = col;
     }
   }
 
   // Then modify it.
   for (int i = 0; i <= count; ++i) {
-    int row = rowsol_[i];
-    int col = colsol_[i];
+    int row = _rowsol[i];
+    int col = _colsol[i];
 
-    if (IsStarred(row, col)) {
-      UnStar(row, col);
+    if (isStarred(row, col)) {
+      unstar(row, col);
     } else {
-      Star(row, col);
+      star(row, col);
     }
   }
 
-  ClearCovers();
-  ClearPrimes();
-  fn_state_ = std::bind(&HungarianOptimizer<T>::CoverStarredZeroes, this);
+  clearCovers();
+  clearPrimes();
+  _fnState = std::bind(&HungarianOptimizer<T>::coverStarredZeroes, this);
 }
 
 // Step 6
@@ -681,20 +685,20 @@ void HungarianOptimizer<T>::MakeAugmentingPath() {
 // covered row, and subtract it from every element of each uncovered column.
 // Return to Step 4 without altering any stars, primes, or covered lines.
 template <typename T>
-void HungarianOptimizer<T>::AugmentPath() {
-  T minval = FindSmallestUncovered();
+void HungarianOptimizer<T>::augmentPath() {
+  T minval = findSmallestUncovered();
 
-  for (int row = 0; row < matrix_size_; ++row) {
-    for (int col = 0; col < matrix_size_; ++col) {
-      if (RowCovered(row)) {
-        costs_(row, col) += minval;
+  for (int row = 0; row < _matrixSize; ++row) {
+    for (int col = 0; col < _matrixSize; ++col) {
+      if (rowCovered(row)) {
+        _costs(row, col) += minval;
       }
 
-      if (!ColCovered(col)) {
-        costs_(row, col) -= minval;
+      if (!colCovered(col)) {
+        _costs(row, col) -= minval;
       }
     }
   }
 
-  fn_state_ = std::bind(&HungarianOptimizer<T>::PrimeZeroes, this);
+  _fnState = std::bind(&HungarianOptimizer<T>::primeZeroes, this);
 }
